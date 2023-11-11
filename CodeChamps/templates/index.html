@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2&display=swap" rel="stylesheet">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детекция незаконной торговли</title>
+    <link type="text/css" href="{%static 'css/styles.css' %}" rel="stylesheet"  />
+    <script>
+				function toggleInput() {
+						var selector = document.getElementById('inputSelector');
+						var rtspInput = document.getElementById('rtspInput');
+						var fileInput = document.getElementById('fileInput');
+						var loadingSpinner = document.getElementById('loadingSpinner');
+
+						if (selector.value === 'rtsp') {
+								rtspInput.style.display = 'block';
+								fileInput.style.display = 'none';
+						} else if (selector.value === 'file') {
+								rtspInput.style.display = 'none';
+								fileInput.style.display = 'block';
+						}
+
+						// Показать индикатор загрузки при отправке формы
+						loadingSpinner.style.display = 'none'; // скрываем его сразу после загрузки страницы
+				}
+
+				function showLoadingSpinner() {
+						var loadingSpinner = document.getElementById('loadingSpinner');
+						loadingSpinner.style.display = 'block'; // показать индикатор загрузки при отправке формы
+				}
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">Cards</div>
+        <nav>
+            <ul>
+                <li><a href="#mainPage">Главная</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Главная страница -->
+        <section id="mainPage" class="page">
+            <div class="content">
+                <h1>Детекция незаконной торговли</h1>
+                <p>Оперативное выявление точек незаконной торговли на основе типа объекта, его размера и местоположения.</p>
+            </div>
+        </section>
+
+        <!-- Страница анализа видеопотока -->
+        <section id="videoAnalysis" class="page">
+					<div class="content">
+							<form id="fileUploadForm" method="post" enctype="multipart/form-data" onsubmit="showLoadingSpinner()">
+								<div id="emailInput" class="input-container">
+									<input class="type-2" type="email" name="user_email" placeholder="Ваша почта">
+							  </div>
+									<div class="input-selector">
+											<select class="select-css" id="inputSelector" onchange="toggleInput()">
+													<option value="rtsp">Rtsp трансляция</option>
+													<option value="file">Загрузка файла</option>
+											</select>
+											<div id="rtspInput" class="input-container">
+													<input class="type-2" type="text" name="rtsp_url" placeholder="Rtsp">
+													<label class="input-file">
+														<input type="submit" name="file" style="display:none;" width="300px">		
+														<span>Начать анализ</span>
+												</label>
+											</div>
+											<div id="fileInput" class="input-container" style="display: none;">
+													<label class="input-file">
+															<input type="file" name="video_file" width="300px">
+															<span>Выберите файл</span>
+													</label>
+													<label class="input-file">
+														<input type="submit" name="file" style="display:none;" width="300px">		
+														<span>Начать анализ</span>
+												</label>
+											</div>
+
+									</div>
+									{% csrf_token %}
+									<input type="submit" name="file" style="display:none;" width="300px">
+							</form>
+					</div>
+			</section>
+			<div id="loadingSpinner" style="display: none;">
+				<img src="https://icons8.com/preloaders/generator.php?filmstrip&image=30&speed=9&fore_color=000000&back_color=FFFFFF&size=160x20&transparency=1&reverse=0&orig_colors=0&gray_transp=0&image_type=2&inverse=0&flip=0&frames_amount=13&word=237-261-157-41-266-237-41-257-237-266-57-41-227-41-36-36-36" alt="Loading...">
+		</div>
+        <section id="videoAnalysis" class="page">
+            <form class="content">
+                <h2>Анализ видеопотока</h2>
+                <div class="videoContainer">
+                    {% if filename %}
+                    <!-- Видео поток -->
+                        <video width="100%" height="50%" controls autoplay>
+                            <source src="{% static 'media/' %}{{ filename }}" type="video/mp4">
+                        </video>
+                    {% endif %}
+                    {% if rtsp_url %}
+                        <video id="rtspPlayer" controls width="100%" height="50%"></video>
+                        <script src="https://cdn.jsdelivr.net/npm/rtsp-to-webrtc@0.2.3/dist/rtsp-to-webrtc.bundle.js"></script>
+                        <script>
+                            const player = new RtspPlayer({
+                                id: 'rtspPlayer',
+                                url: '{{ rtsp_url }}',
+                            });
+                            player.play();
+                        </script>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+				<section id="videoAnalysis" class="page">
+					<div class="content">
+        {% if images %}
+            <a href="{% static '/zip/download.zip'%}" download><button>Загрузить архив</button></a>
+						<form method="post" enctype="multipart/form-data" class="action-buttons">
+                            {% csrf_token %}
+							<button class="green-check" type="submit" name="good">&#10003;</button>
+							<button class="red-cross" type="submit" name="bad">&#10007;</button>
+                        </form>
+						<div class="gallery">
+                {% for image in images %}
+                <div class="image-container" data-image-name="{{ image }}">
+                    <img src="{% static 'data/images/' %}{{ image }}">
+                </div>
+                {% endfor %}
+            </div>
+            <div class="gallery-controls">
+                <button onclick="prevImage()">Предыдущее</button>
+                <button onclick="nextImage()">Следующее</button>
+            </div>
+						<div class="gallery-controls">
+							<button>Начать дообучение</button>
+						</div>
+					</div>
+					</section>
+        {% endif %}
+
+        <!-- рассказ, как работает -->
+        <section id="aboutService" class="page">
+            <div class="content">
+                <h2>О сервисе</h2>
+                <p>Наш сервис предоставляет возможность оперативно выявлять точки незаконной торговли на основе типа объекта, его размера и местоположения.</p>
+            </div>
+        </section>
+        
+        <script>
+            var currentIndex = 0;
+            var images = {% autoescape off %}{{ images | safe }}{% endautoescape %};
+            var imagePaths = [];
+        
+            // Преобразование списка изображений в массив путей
+            {% for image in images %}
+                imagePaths.push("{% static 'images/' %}{{ image }}");
+            {% endfor %}
+        
+            function showImage(index) {
+                var galleryImages = document.querySelectorAll('.gallery img');
+                galleryImages.forEach(function(image) {
+                    image.style.display = 'none';
+                });
+                galleryImages[index].style.display = 'block';
+            }
+        
+            function prevImage() {
+                currentIndex = (currentIndex - 1 + imagePaths.length) % imagePaths.length;
+                showImage(currentIndex);
+            }
+        
+            function nextImage() {
+                currentIndex = (currentIndex + 1) % imagePaths.length;
+                showImage(currentIndex);
+            }
+        
+            showImage(currentIndex);
+        </script>
+</body>
+</html>

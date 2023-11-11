@@ -1,0 +1,5 @@
+PATH_TO_MODEL1='./CodeChamps/utils_cv/best.pt'
+PATH_TO_MODEL2='./CodeChamps/utils_cv/best_1.pt'
+PATH_TO_FOLDER_WITH_VIDEOS='./videos/'
+PATH_TO_SAVE_PREDICTIONS='./CodeChamps/static/data'
+PATH_ZIP = './CodeChamps/static/zip/download'
